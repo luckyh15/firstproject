@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC 
+	"-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+<mapper namespace="AdminMember">
+	
+	<!-- 쿼리를 xml로 작성하고 id:식별값	parameterType:우리가 전달할 값
+		 resultType:데이터를 받아오는 값 -->
+
+	<select id="AdminMember_isDuplicate" parameterType="AdminMemberDto" resultType="Integer">
+		select count(*) from adminmember
+		where userid = #{userid}
+	</select>
+	
+	<insert id="AdminMember_insert" parameterType="AdminMemberDto">
+		INSERT INTO adminmember
+		(
+			userid,
+			password,
+			username,
+			email,
+			wdate,
+			nickname,
+			phone,
+			zipcode,
+			address1,
+			address2,
+			user_images
+		)
+		
+		VALUES
+		(
+			#{userid},
+			#{password},
+			#{username},
+			#{email},
+			now(),
+			#{nickname},
+			#{phone},
+			#{zipcode},
+			#{address1},
+			#{address2},
+			#{user_images}
+		);
+		
+	</insert>
+	
+	<select id="AdminMember_getInfo" parameterType="AdminMemberDto" resultType="AdminMemberDto">
+		select
+			id
+			,A.userid
+			,A.password
+			,A.email
+			,A.phone
+			,A.username
+			,A.nickname
+			,A.zipcode
+			,A.address1
+			,A.address2
+			,A.user_images
+		from adminmember A
+		where userid=#{userid}
+	</select>
+	
+	<select id="AdminMember_findId" parameterType="AdminMemberDto" resultType="AdminMemberDto">
+		select
+			id
+			,userid
+			,password
+			,email
+			,phone
+			,username
+		from adminmember
+		where username=#{username} and email=#{email} and phone=#{phone}
+	</select>
+	
+	<select id="AdminMember_findPassword" parameterType="AdminMemberDto" resultType="AdminMemberDto">
+		select
+			id
+			,A.userid
+			,A.password
+			,A.email
+			,A.phone
+			,A.username
+			,A.nickname
+			,A.zipcode
+			,A.address1
+			,A.address2
+			
+		from adminmember A
+		where userid=#{userid} and username=#{username} and email=#{email} and phone=#{phone}
+	</select>
+	
+	<update id="AdminMember_updateInfo" parameterType="AdminMemberDto">
+		update adminmember set password = #{password}
+						 ,email = #{email}
+						 ,phone = #{phone}
+						 ,address1 = #{address1}
+						 ,address2 = #{address2}
+						 ,zipcode = #{zipcode}
+						 ,nickname = #{nickname}
+						 ,username = #{username}
+		where userid = #{userid}
+	</update>
+	
+	<select id="AdminMember_cnt" parameterType="AdminMemberDto" resultType="Integer">
+	select sum(A.cnt) from
+		(select count(board_seq) as cnt from movie_tbl
+		union all
+		select count(board_seq) as cnt from animation_tbl
+		union all
+		select count(board_seq) as cnt from webtoon_tbl
+		union all
+		select count(board_seq) as cnt from drama_tbl
+		union all
+		select count(board_seq) as cnt from entertain_tbl
+		) A
+	</select>
+	
+	<select id="AdminMember_user" parameterType="AdminMemberDto" resultType="Integer">
+		select count(*) from user
+	</select>
+	
+	<select id="AdminMember_category" parameterType="AdminMemberDto" resultType="AdminMemberDto">
+	select
+            (select count(board_seq) from movie_tbl)m,
+            (select count(board_seq) from animation_tbl)a,
+            (select count(board_seq) from webtoon_tbl)t,
+            (select count(board_seq) from drama_tbl)d,
+            (select count(board_seq) from entertain_tbl)e
+    from dual;
+	</select>
+
+</mapper>

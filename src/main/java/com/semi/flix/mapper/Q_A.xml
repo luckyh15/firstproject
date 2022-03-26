@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="Q_A_DAO">
+
+	<resultMap id="q_a" type="Q_A_DTO">
+		<id property="q_a_seq" column="Q_A_SEQ" />
+		<result property="q_a_title" column="Q_A_TITLE" />
+		<result property="q_a_contents" column="Q_A_CONTENTS" />
+		<result property="q_a_wdate" column="Q_A_WDATE" />
+		<result property="q_a_hit" column="Q_A_HIT" />
+		
+
+	</resultMap>
+
+	<insert id="insertQ_A">
+		<![CDATA[
+		INSERT INTO Q_A(USER_SEQ,Q_A_TITLE, Q_A_CONTENTS, Q_A_WDATE)
+		VALUES(#{user_seq},#{q_a_title}, #{q_a_contents}, now())
+		]]>
+	</insert>
+
+	<update id="updateQ_A">
+		<![CDATA[
+		UPDATE Q_A SET Q_A_TITLE=#{q_a_title}, Q_A_CONTENTS=#{q_a_contents} WHERE Q_A_SEQ=#{q_a_seq}
+		]]>
+	</update>
+
+	<delete id="deleteQ_A">
+		<![CDATA[
+		DELETE FROM Q_A WHERE Q_A_SEQ=#{q_a_seq}
+		]]>
+	</delete>
+
+	<select id="getQ_A" parameterType="Q_A_DTO" resultType="Q_A_DTO">
+		<![CDATA[
+		select a.q_a_seq, a.USER_SEQ, a.q_a_title, a.q_a_contents, a.q_a_wdate, a.q_a_hit, (select b.user_id from user b where a.user_seq=b.user_seq) as user_id
+		from q_a a
+		 WHERE Q_A_SEQ=#{q_a_seq}
+		]]>
+	</select>
+
+	<select id="getQ_A_List"  parameterType="Q_A_DTO" resultType="Q_A_DTO">
+		<![CDATA[
+			select a.q_a_seq, a.USER_SEQ, a.q_a_title, a.q_a_contents, a.q_a_wdate, a.q_a_hit, (select b.user_id from user b where a.user_seq=b.user_seq) as user_id
+			from q_a a
+			ORDER BY Q_A_SEQ DESC
+		]]>
+	</select>
+</mapper>
+	
+	
+
+

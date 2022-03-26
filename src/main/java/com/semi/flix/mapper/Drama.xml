@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+	 PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+<mapper namespace="Drama">
+
+	<select id="Drama_getList" parameterType="DramaDto" resultType="DramaDto">
+   select board_seq,
+				genre_code,
+				drama_title,
+				drama_content,
+				drama_images,
+				drama_producer,
+				drama_hit,
+				drama_url,
+				drama_avg_ratings,
+				drama_productionyear,
+				wdate,
+				drama_agelimit, 
+				rnum,
+                category_code,
+				ifnull((select round(avg(star_point),2) from review_tbl B where A.board_seq =B.board_seq and A.category_code=B.category_code),0) as star_avg 
+		from 
+ 		(
+	 		select
+				board_seq,
+				genre_code,
+				drama_title,
+				drama_content,
+				drama_images,
+				drama_producer,
+				drama_hit,
+				drama_url,
+				drama_avg_ratings,
+				drama_productionyear,
+				wdate,
+				drama_agelimit,
+                category_code,
+			    @rownum := @rownum+1 AS rnum
+				from drama_tbl, (select @rownum:=0) B		
+				
+				<if test='key!=null'>
+	
+					<if test='key=="0"'>
+					where genre_code = 00 
+					</if>
+					<if test='key=="1"'>
+					where genre_code = 01 
+					</if>
+					<if test='key=="2"'>
+					where genre_code = 02 
+					</if>
+					<if test='key=="3"'>
+					where genre_code = 03 
+					</if>
+					<if test='key=="4"'>
+					where genre_code = 04
+					</if>
+					<if test='key=="5"'>
+					where genre_code = 05
+					</if>
+					<if test='key=="6"'>
+					where genre_code = 06
+					</if>
+					<if test='key=="7"'>
+					where genre_code = 07
+					</if>
+					<if test='key=="8"'>
+					where genre_code = 08
+					</if>
+					<if test='key=="9"'>
+					where genre_code = 09
+					</if>
+					<if test='key=="10"'>
+					where genre_code = 10
+					</if>
+					<if test='key=="11"'>
+					where genre_code = 11
+					</if>
+					<if test='key=="12"'>
+					</if>
+				
+				
+				</if> 
+		
+			
+			order by board_seq desc
+		) A
+		   
+		limit #{start}, #{pageSize}   
+	</select>
+	
+	<select id="Drama_getTotal" parameterType="DramaDto" resultType="Integer">
+		select count(*) from drama_tbl 
+		<if test='key!=null'>
+	
+					<if test='key=="0"'>
+					where genre_code = 00 
+					</if>
+					<if test='key=="1"'>
+					where genre_code = 01 
+					</if>
+					<if test='key=="2"'>
+					where genre_code = 02 
+					</if>
+					<if test='key=="3"'>
+					where genre_code = 03 
+					</if>
+					<if test='key=="4"'>
+					where genre_code = 04
+					</if>
+					<if test='key=="5"'>
+					where genre_code = 05
+					</if>
+					<if test='key=="6"'>
+					where genre_code = 06
+					</if>
+					<if test='key=="7"'>
+					</if>
+				</if> 
+	</select>
+	
+	<select id="Drama_getView" parameterType="DramaDto" resultType="DramaDto">
+	 	select A.*,
+	 	ifnull((select round(avg(star_point),2) from review_tbl B where A.board_seq =B.board_seq and A.category_code=B.category_code),0) as star_avg
+	 	
+	 	 from drama_tbl A  where board_seq=#{board_seq}
+	 </select>
+	 
+	 <select id="Drama_getRank" parameterType="DramaDto" resultType="DramaDto">
+		select A.*,
+			ifnull((select round(avg(star_point),2) from review_tbl B where A.board_seq =B.board_seq and A.category_code=B.category_code),0) as star_avg 
+				from drama_tbl A order by star_avg desc limit 0,10
+		
+	</select>
+	
+</mapper>
+
+
+
+
+
+
+
+

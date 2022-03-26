@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC 
+	"-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+<mapper namespace="Mail">
+	
+	<insert id="Mail_insert" parameterType="MailDto">
+		insert into mail
+		(title, content, user_seq, id, date)
+		values
+		(#{title}, #{content}, #{user_seq}, #{id}, now())
+	</insert>
+	
+	<select id="Mail_getList" parameterType="MailDto" resultType="MailDto">
+		select seq, title, content, id, toname as name1, fromname as name2, date, rnum from
+		(select seq, title, content, id, toname, fromname, date, @rownum := @rownum+1 as rnum from
+		    (select m.seq as seq, m.title as title, m.content as content, u.user_id as id, u.name as toname, a.username as fromname, m.date as date
+		     from mail m, user u, adminmember a
+		     where m.user_seq = u.user_seq
+		     and m.id = a.id
+		     )A, (select @rownum:=0) B
+	     <if test='key!=null and keyword!=null'>
+
+         <if test='key=="1"'>
+         where title like concat('%', #{keyword} , '%') or
+               toname like concat('%', #{keyword} , '%') or 
+               fromname like concat('%', #{keyword} , '%')
+         </if>
+         
+         <if test='key=="2"'>
+         where title like concat('%', #{keyword} , '%')
+         </if>
+         
+         <if test='key=="3"'>
+         where toname like concat('%', #{keyword} , '%')
+         </if>
+         
+         <if test='key=="4"'>
+         where fromname like concat('%', #{keyword} , '%')
+         </if>
+         
+      	 </if>
+      	 
+		     order by seq desc
+		 ) C
+		 limit  #{start}, #{pageSize}
+	</select>
+	
+	<select id="Mail_getTotal" parameterType="MailDto" resultType="Integer">
+		select count(*) from mail
+	</select>
+	
+	<select id="Mail_getView" parameterType="String" resultType="MailDto">
+		select seq, title, content, id, toname, fromname, date from
+		    (select m .seq as seq, m.title as title, m.content as content, u.user_id as id, u.name as toname, a.username as fromname, m.date as date
+		     from mail m, user u, adminmember a
+		     where m.user_seq = u.user_seq
+		     and m.id = a.id
+		     )A where seq = #{seq}
+	</select>
+	
+</mapper>

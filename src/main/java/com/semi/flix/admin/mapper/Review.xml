@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC 
+	"-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+<mapper namespace="Review">
+	
+	<!-- 쿼리를 xml로 작성하고 id:식별값	parameterType:우리가 전달할 값
+		 resultType:데이터를 받아오는 값 -->
+	<select id="Review_getList" parameterType="ReviewDto"	resultType="ReviewDto">
+ 		 select seq, title, name, genre_code, category_code, content, category_name, genre_name, rnum from
+			(select seq, title, name, genre_code, category_code, content, category_name, genre_name, @rownum := @rownum+1 AS rnum from 
+				(select r.review_seq as seq, d.drama_title as title, u.name as name, d.genre_code as genre_code, r.category_code as category_code, 
+				r.content as content, c.category_name as category_name, g.genre_name as genre_name
+				from drama_tbl d, user u, category_tbl c, review_tbl r, genre_tbl g, (select @rownum:=0) B
+				where r.category_code = d.category_code
+		        and c.category_code = r.category_code
+				and d.board_seq = r.board_seq
+		        and d.category_code = r.category_code
+				and u.user_seq = r.user_seq
+				and d.genre_code =g.genre_code
+				union all
+				select r.review_seq as seq, e.enter_title as title, u.name as name, e.genre_code as genre_code, r.category_code as category_code, 
+				r.content as content, c.category_name as category_name, g.genre_name as genre_name
+				from entertain_tbl e, user u, category_tbl c, review_tbl r, genre_tbl g
+				where r.category_code = e.category_code
+		        and c.category_code = r.category_code
+				and e.board_seq = r.board_seq
+		        and e.category_code = r.category_code
+				and u.user_seq = r.user_seq
+				and e.genre_code = g.genre_code
+		        union all
+				select r.review_seq as seq, m.movie_title as title, u.name as name, m.genre_code as genre_code, r.category_code as category_code, 
+				r.content as content, c.category_name as category_name, g.genre_name as genre_name
+				from movie_tbl m, user u, category_tbl c, review_tbl r, genre_tbl g
+				where r.category_code = m.category_code
+		        and c.category_code = r.category_code
+				and m.board_seq = r.board_seq
+		        and m.category_code = r.category_code
+				and u.user_seq = r.user_seq
+				and m.genre_code =g.genre_code
+		        union all
+				select r.review_seq as seq, t.toon_title as title, u.name as name, t.genre_code as genre_code, r.category_code as category_code, 
+				r.content as content, c.category_name as category_name, g.genre_name as genre_name
+				from webtoon_tbl t, user u, category_tbl c, review_tbl r, genre_tbl g
+				where r.category_code = t.category_code
+		        and c.category_code = r.category_code
+				and t.board_seq = r.board_seq
+		        and t.category_code = r.category_code
+				and u.user_seq = r.user_seq
+				and t.genre_code =g.genre_code
+		        union all
+				select r.review_seq as seq, a.ani_title as title, u.name as name, a.genre_code as genre_code, r.category_code as category_code, 
+				r.content as content, c.category_name as category_name, g.genre_name as genre_name
+				from animation_tbl a, user u, category_tbl c, review_tbl r, genre_tbl g
+				where r.category_code = a.category_code
+		        and c.category_code = r.category_code
+				and a.board_seq = r.board_seq
+		        and a.category_code = r.category_code
+				and u.user_seq = r.user_seq
+				and a.genre_code =g.genre_code
+			) A, (select @rownum:=0) B
+		<if test='key!=null and keyword!=null'>
+
+         <if test='key=="1"'>
+         where title like concat('%', #{keyword} , '%') or
+               name like concat('%', #{keyword} , '%') or 
+               category_name like concat('%', #{keyword} , '%') or
+               genre_name like concat('%', #{keyword} , '%') 
+         </if>
+         
+         <if test='key=="2"'>
+         where title like concat('%', #{keyword} , '%')
+         </if>
+         
+         <if test='key=="3"'>
+         where name like concat('%', #{keyword} , '%')
+         </if>
+         
+         <if test='key=="4"'>
+         where category_name like concat('%', #{keyword} , '%')
+         </if>
+         
+         <if test='key=="5"'>
+         where genre_name like concat('%', #{keyword} , '%')
+         </if>
+         
+      	</if>
+		order by seq desc
+		) C
+		limit #{start}, #{pageSize}
+	</select>
+	<!-- 
+		paging 쿼리는 dbms마다 다르다
+		select ~~ limit 시작위치, 개수
+	 -->
+	<!-- 페이징 때문에 전체 레코드 개수를 알아오기 위한 쿼리가 필요하다. -->
+	<select id="Review_getTotal" parameterType="ReviewDto" resultType="Integer">
+		 select count(*) from review_tbl;
+	</select>
+	
+	<!-- 안됨... -->
+	<!-- union all 하는것도 안됨.. -->
+	<select id="Review_getView" parameterType="String"	resultType="ReviewDto">
+ 	select 
+ 	A.seq, A.title, A.name, A.content, A.category_name, A.genre_name 
+ 	from 
+		(select r.review_seq as seq, d.drama_title as title, u.name as name, d.genre_code as genre_code, r.category_code as category_code, 
+		r.content as content, c.category_name as category_name, g.genre_name as genre_name
+		from drama_tbl d, user u, category_tbl c, review_tbl r, genre_tbl g
+		where r.category_code = d.category_code
+        and c.category_code = r.category_code
+        and g.genre_code in (select distinct genre_code from drama_tbl d, review_tbl r, user u
+							where d.board_seq = r.board_seq
+							and d.category_code = r.category_code
+							and u.user_seq = r.user_seq)
+		and d.board_seq = r.board_seq
+        and d.category_code = r.category_code
+		and u.user_seq = r.user_seq
+		and d.genre_code in (select distinct genre_code from drama_tbl d, review_tbl r, user u
+							where d.board_seq = r.board_seq
+							and d.category_code = r.category_code
+							and u.user_seq = r.user_seq)
+		union all
+		select r.review_seq as seq, e.enter_title as title, u.name as name, e.genre_code as genre_code, r.category_code as category_code, 
+		r.content as content, c.category_name as category_name, g.genre_name as genre_name
+		from entertain_tbl e, user u, category_tbl c, review_tbl r, genre_tbl g
+		where r.category_code = e.category_code
+        and c.category_code = r.category_code
+		and e.board_seq = r.board_seq
+        and e.category_code = r.category_code
+		and u.user_seq = r.user_seq
+		and e.genre_code = g.genre_code
+        union all
+		select r.review_seq as seq, m.movie_title as title, u.name as name, m.genre_code as genre_code, r.category_code as category_code, 
+		r.content as content, c.category_name as category_name, g.genre_name as genre_name
+		from movie_tbl m, user u, category_tbl c, review_tbl r, genre_tbl g
+		where r.category_code = m.category_code
+        and c.category_code = r.category_code
+		and m.board_seq = r.board_seq
+        and m.category_code = r.category_code
+		and u.user_seq = r.user_seq
+		and m.genre_code = g.genre_code
+        union all
+		select r.review_seq as seq, t.toon_title as title, u.name as name, t.genre_code as genre_code, r.category_code as category_code, 
+		r.content as content, c.category_name as category_name, g.genre_name as genre_name
+		from webtoon_tbl t, user u, category_tbl c, review_tbl r, genre_tbl g
+		where r.category_code = t.category_code
+        and c.category_code = r.category_code
+		and t.board_seq = r.board_seq
+        and t.category_code = r.category_code
+		and u.user_seq = r.user_seq
+		and t.genre_code = g.genre_code
+        union all
+		select r.review_seq as seq, a.ani_title as title, u.name as name, a.genre_code as genre_code, r.category_code as category_code, 
+		r.content as content, c.category_name as category_name, g.genre_name as genre_name
+		from animation_tbl a, user u, category_tbl c, review_tbl r, genre_tbl g
+		where r.category_code = a.category_code
+        and c.category_code = r.category_code
+		and a.board_seq = r.board_seq
+        and a.category_code = r.category_code
+		and u.user_seq = r.user_seq
+		and a.genre_code =g.genre_code
+		) A  where seq = #{seq}
+
+	</select>
+	
+	<delete id="Review_delete" parameterType="String">
+		delete from review_tbl where review_seq = #{seq}
+	</delete>
+	
+</mapper>

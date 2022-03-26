@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC 
+	"-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+<mapper namespace="AdminComment">
+	
+	<insert id="Comment_insert" parameterType="AdminCommentDto">
+		insert into q_a_comment
+		(q_a_seq, title, content, wdate)
+		values
+		(#{q_a_seq}, #{title}, #{content}, now())
+	</insert>
+	
+	<select id="Comment_getList" parameterType="AdminCommentDto" resultType="AdminCommentDto">
+		select 
+			seq, q_a_seq, title, content, wdate
+		from q_a_comment
+		where q_a_seq=#{q_a_seq}
+	</select>
+	
+	<select id="Comment_getView" parameterType="AdminCommentDto" resultType="AdminCommentDto">
+		select 
+			seq, q_a_seq, title, content, wdate
+		from q_a_comment
+		where seq=#{seq}
+	</select>
+	
+	<delete id="Comment_delete" parameterType="AdminCommentDto">
+		delete from q_a_comment where seq=#{seq}
+	</delete>
+	
+</mapper>

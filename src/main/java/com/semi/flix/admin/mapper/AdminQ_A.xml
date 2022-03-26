@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC 
+	"-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+<mapper namespace="AdminQ_A">
+	
+	<!-- 쿼리를 xml로 작성하고 id:식별값	parameterType:우리가 전달할 값
+		 resultType:데이터를 받아오는 값 -->
+	<select id="AdminQ_A_getList" parameterType="AdminQ_ADto"	resultType="AdminQ_ADto">
+ 		
+ 		select seq, title, content, name, date, rnum from
+			(select seq, title, content, name, date, @rownum := @rownum+1 as rnum from
+				(select  q.q_a_seq as seq, q.q_a_title as title, q.q_a_contents as content, u.name as name, q.q_a_wdate as date
+					from q_a q, user u
+        			where q.user_seq = u.user_seq
+        			)A, (select @rownum:=0) B
+        			
+		<!-- if test="key=='1'" 이렇게 쓰면 인식이 안된다. 따음표 위치 잘 확인하자.-->
+		
+		<if test='key!=null and keyword!=null'>
+
+         <if test='key=="1"'>
+         where title like concat('%', #{keyword} , '%') or
+               name like concat('%', #{keyword} , '%') or 
+               date like concat('%', #{keyword} , '%') 
+         </if>
+         
+         <if test='key=="2"'>
+         where title like concat('%', #{keyword} , '%')
+         </if>
+         
+         <if test='key=="3"'>
+         where name like concat('%', #{keyword} , '%')
+         </if>
+         
+         <if test='key=="4"'>
+         where date like concat('%', #{keyword} , '%')
+         </if>
+         
+      	</if>
+      	
+				order by seq desc
+		 ) C
+		 limit  #{start}, #{pageSize}
+	</select>
+	<!-- 
+		paging 쿼리는 dbms마다 다르다
+		select ~~ limit 시작위치, 개수
+	 -->
+	<!-- 페이징 때문에 전체 레코드 개수를 알아오기 위한 쿼리가 필요하다. -->
+	<select id="AdminQ_A_getTotal" parameterType="AdminQ_ADto" resultType="Integer">
+		select count(*) from q_a
+	</select>
+	
+	<select id="AdminQ_A_getView" parameterType="String" resultType="AdminQ_ADto">
+			select seq, title, content, name, date from
+				(select  q.q_a_seq as seq, q.q_a_title as title, q.q_a_contents as content, u.name as name, q.q_a_wdate as date
+					from q_a q, user u
+					where q.user_seq = u.user_seq
+				) A
+			where seq= #{seq} ;
+	</select>
+	
+	<delete id="AdminQ_A_delete" parameterType="String">
+		delete from q_a_comment where q_a_seq=#{seq};
+		delete from q_a where q_a_seq=#{seq};		
+	</delete>
+	
+</mapper>

@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+<mapper namespace="Search">
+<select id="listPage" parameterType="SearchDto"  resultType="SearchDto">
+
+    select A.*, 
+		ifnull((select round(avg(star_point),2) from review_tbl B 
+		where A.board_seq =B.board_seq and A.category_code=B.category_code),0) as star_avg 
+		
+		
+       from (
+         select
+          category_code, board_seq, 
+          drama_title as title, drama_producer as producer, drama_content as content, drama_images as images, 
+         a.genre_name,a.genre_code
+         from drama_tbl dr, genre_tbl a
+         where a.genre_code = dr.genre_code
+         union all
+         
+         select 
+          category_code, board_seq, movie_title as title, movie_producer as producer, movie_content as content, movie_images as images, 
+         a.genre_name,a.genre_code
+         from movie_tbl movie, genre_tbl a
+         where a.genre_code = movie.genre_code
+         
+         union all
+         
+         select
+          category_code, board_seq, enter_title as title, enter_producer as producer, enter_content as content, enter_images as images, 
+		 a.genre_name,a.genre_code
+		 from entertain_tbl enter, genre_tbl a
+		 where a.genre_code = enter.genre_code
+		 
+		 union all
+		 
+         select
+          category_code, board_seq, ani_title as title, ani_producer as producer, ani_content as content, ani_images as images, 
+		 a.genre_name,a.genre_code
+		 from animation_tbl ani, genre_tbl a
+		 where a.genre_code = ani.genre_code
+		 
+         union all
+         
+         select category_code, board_seq, toon_title as title, toon_author as producer, toon_content as content, toon_images as images, 
+		 a.genre_name,a.genre_code
+		 from webtoon_tbl toon, genre_tbl a
+		 where a.genre_code = toon.genre_code
+		 
+		 
+      ) A
+      	where
+            A.title like concat('%', '${keyword}','%')
+     		or A.producer like concat('%', '${keyword}','%')
+    
+			
+      </select>
+   
+</mapper>

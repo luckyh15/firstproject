@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+	 PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+<mapper namespace="Visit">
+	<select id="Visit_getTotal" parameterType="VisitDto" resultType="Integer">
+		select ifnull(sum(visit_count), 0) from tb_visit_count where wdate = date_format(now(), '%Y-%m-%d');
+	</select>
+	
+	<select id="Visit_insert" parameterType="VisitDto" >
+		insert into tb_visit_count(wdate, visit_count) values(date_format(now(), '%Y-%m-%d'), 1);
+	</select>
+	
+	<select id="Visit_update" parameterType="VisitDto">
+		update tb_visit_count set visit_count = visit_count+1 where wdate=date_format(now(), '%Y-%m-%d');
+	</select>
+	
+	<select id="Visit_month" resultType="VisitDto">
+		select DATE_FORMAT(wdate, '%m') as month, sum(visit_count) as m_cnt from tb_visit_count group by month;
+	</select>
+</mapper>

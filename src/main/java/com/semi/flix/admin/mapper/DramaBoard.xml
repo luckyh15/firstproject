@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC 
+	"-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+<mapper namespace="DramaBoard">
+	
+	<!-- 쿼리를 xml로 작성하고 id:식별값	parameterType:우리가 전달할 값
+		 resultType:데이터를 받아오는 값 -->
+	<select id="DramaBoard_getList" parameterType="DramaBoardDto"	resultType="DramaBoardDto">
+ 		
+ 		select 
+ 		board_seq, genre_code, drama_title, drama_content, drama_images, drama_avg_ratings, category_code, drama_producer, drama_hit, wdate
+		,drama_productionyear , drama_agelimit, drama_url, genre_name, category_name, rnum from
+		(select d.board_seq, d.genre_code, d.drama_title, d.drama_content, d.drama_images, d.drama_avg_ratings, d.category_code, d.drama_producer, d.drama_hit, d.wdate
+		,d.drama_productionyear , d.drama_agelimit, d.drama_url, g.genre_name as genre_name, c.category_name as category_name, @rownum := @rownum+1 AS rnum 
+        from drama_tbl d, category_tbl c, genre_tbl g
+        where d.category_code = c.category_code
+        and d.genre_code = g.genre_code)
+        A, (select @rownum:=0) B 
+		
+		<!-- if test="key=='1'" 이렇게 쓰면 인식이 안된다. 따음표 위치 잘 확인하자.-->
+		
+		<if test='key!=null and keyword!=null'>
+
+         <if test='key=="1"'>
+         where drama_title like concat('%', #{keyword} , '%') or
+               genre_name like concat('%', #{keyword} , '%') or 
+               drama_producer like concat('%', #{keyword} , '%') 
+         </if>
+         
+         <if test='key=="2"'>
+         where drama_title like concat('%', #{keyword} , '%')
+         </if>
+         
+         <if test='key=="3"'>
+         where drama_producer like concat('%', #{keyword} , '%')
+         </if>
+         
+         <if test='key=="4"'>
+         where genre_name like concat('%', #{keyword} , '%')
+         </if>
+         
+      	</if>
+      	
+		order by board_seq desc
+		limit #{start}, #{pageSize}
+	</select>
+	<!-- 
+		paging 쿼리는 dbms마다 다르다
+		select ~~ limit 시작위치, 개수
+	 -->
+	<!-- 페이징 때문에 전체 레코드 개수를 알아오기 위한 쿼리가 필요하다. -->
+	<select id="DramaBoard_getTotal" parameterType="DramaBoardDto" resultType="Integer">
+		select count(*) from drama_tbl
+	</select>
+	
+	<insert id="DramaBoard_insert" parameterType="DramaBoardDto">
+		insert into drama_tbl
+		(category_code, genre_code, drama_title, drama_producer, drama_content, drama_images, drama_avg_ratings, drama_hit, drama_productionyear, drama_agelimit, drama_url, wdate)
+		values
+		(#{category_code}, #{genre_code}, #{drama_title}, #{drama_producer}, #{drama_content}, #{drama_images}, #{drama_avg_ratings}, #{drama_hit}, #{drama_productionyear}, #{drama_agelimit}, #{drama_url}, now())
+	</insert>
+	
+	<select id="DramaBoard_getView" parameterType="String"	resultType="DramaBoardDto">
+ 		select 
+ 		board_seq, genre_code, drama_title, drama_content, drama_images, drama_avg_ratings, category_code, drama_producer, drama_hit, wdate
+		,drama_productionyear , drama_agelimit, drama_url, genre_name, category_name from
+		(select d.board_seq, d.genre_code, d.drama_title, d.drama_content, d.drama_images, d.drama_avg_ratings, d.category_code, d.drama_producer, d.drama_hit, d.wdate
+		,d.drama_productionyear , d.drama_agelimit, d.drama_url, g.genre_name as genre_name, c.category_name as category_name
+        from drama_tbl d, category_tbl c, genre_tbl g
+        where d.category_code = c.category_code
+        and d.genre_code = g.genre_code)
+        A where board_seq = #{board_seq}
+
+	</select>
+	
+	<delete id="DramaBoard_delete" parameterType="String">
+		delete from drama_tbl where board_seq=#{board_seq}
+	</delete>
+	
+	<update id="DramaBoard_update" parameterType="DramaBoardDto">
+		update drama_tbl set genre_code = #{genre_code}
+						,category_code = #{category_code}
+						,drama_title = #{drama_title}
+						,drama_producer = #{drama_producer}
+						,drama_content = #{drama_content}
+						,drama_images = #{drama_images}
+						,drama_avg_ratings = #{drama_avg_ratings}
+						,drama_productionyear = #{drama_productionyear}
+						,drama_agelimit = #{drama_agelimit}
+						,drama_url = #{drama_url}
+		where board_seq=#{board_seq}
+	</update>
+</mapper>

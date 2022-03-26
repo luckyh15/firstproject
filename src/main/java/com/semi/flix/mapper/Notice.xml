@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="NoticeDAO">
+
+	<resultMap id="notice" type="NoticeDTO">
+		<id property="notice_seq" column="NOTICE_SEQ" />
+		<result property="notice_title" column="NOTICE_TITLE" />
+		<result property="notice_content" column="NOTICE_CONTENT" />
+		<result property="wdate" column="WDATE" />
+		<result property="notice_hit" column="NOTICE_HIT" />
+		<result property="user_id" column="USER_ID" />
+		<result property="id" column="ID" />
+
+	</resultMap>
+
+	<insert id="insertNotice" parameterType="NoticeDTO">
+		<![CDATA[
+		INSERT INTO NOTICE(NOTICE_TITLE,NOTICE_CONTENT,ID,USER_ID)
+		VALUES(#{notice_title}, #{notice_content} , #{id} , #{user_id})
+		]]>
+	</insert>
+
+	<update id="updateNotice" parameterType="NoticeDTO">
+		<![CDATA[
+		UPDATE NOTICE SET NOTICE_TITLE=#{notice_title}, NOTICE_CONTENT=#{notice_content} WHERE NOTICE_SEQ=#{notice_seq}
+		]]>
+	</update>
+
+	<delete id="deleteNotice" parameterType="NoticeDTO">
+		<![CDATA[
+		DELETE FROM NOTICE WHERE NOTICE_SEQ=#{notice_seq}
+		]]>
+	</delete>
+
+	<select id="getNotice" parameterType="NoticeDTO" resultType="NoticeDTO">
+		<![CDATA[
+		select a.NOTICE_SEQ, a.ID, a.NOTICE_TITLE, a.NOTICE_CONTENT, a.WDATE, a.NOTICE_HIT, (select b.userid from adminmember b where a.ID=b.ID) as user_id
+		from notice a
+		WHERE  NOTICE_SEQ=#{notice_seq}
+		]]>
+	</select>
+
+	<select id="getNotice_List"  parameterType="NoticeDTO" resultType="NoticeDTO">
+		<![CDATA[
+			select a.NOTICE_SEQ, a.ID, a.NOTICE_TITLE, a.NOTICE_CONTENT, a.WDATE, a.NOTICE_HIT, (select b.userid from adminmember b where a.ID=b.ID) as user_id
+		from notice a
+			ORDER BY NOTICE_SEQ DESC
+		]]>
+	</select>
+</mapper>
+	
+	
+
+
+

@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+	 PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+<mapper namespace="Webtoon">
+
+	<!-- 쿼리를 xml로 작성하고 id:식별값  
+		  parameterType:우리가 전달할값 
+	     resultType : 받아오는값  -->
+	     
+	<!-- if test="key=='1'"  - 이렇게 쓰면 안된다 인식안된다 -->
+	
+	 
+	<select id="Webtoon_getList" parameterType="WebtoonDto" resultType="WebtoonDto">
+		select A.*, 
+		ifnull((select round(avg(star_point),2) from review_tbl B where A.board_seq =B.board_seq and A.category_code=B.category_code),0) as star_avg 
+		from
+ 		(
+	 		select
+				board_seq,
+				category_code,
+				genre_code,
+				toon_title,
+				toon_author,
+				toon_content,
+				toon_images,
+				toon_hit,
+				toon_productionyear,
+				toon_agelimit,
+				toon_url,
+			    @rownum := @rownum+1 AS rnum
+				from webtoon_tbl A, (select @rownum:=0) B
+				
+				<if test='key!=null'>
+	
+					<if test='key=="0"'>
+					where genre_code = 00 
+					</if>
+					<if test='key=="1"'>
+					where genre_code = 01 
+					</if>
+					<if test='key=="2"'>
+					where genre_code = 02 
+					</if>
+					<if test='key=="3"'>
+					where genre_code = 03 
+					</if>
+					<if test='key=="4"'>
+					where genre_code = 04
+					</if>
+					<if test='key=="5"'>
+					where genre_code = 05
+					</if>
+					<if test='key=="6"'>
+					where genre_code = 06
+					</if>
+					<if test='key=="7"'>
+					where genre_code = 07
+					</if>
+					<if test='key=="8"'>
+					where genre_code = 08
+					</if>
+					<if test='key=="9"'>
+					where genre_code = 09
+					</if>
+					<if test='key=="10"'>
+					where genre_code = 10
+					</if>
+					<if test='key=="11"'>
+					where genre_code = 11
+					</if>
+					<if test='key=="12"'>
+					</if>
+				
+				
+				</if> 
+		
+			
+			order by board_seq desc
+		) A
+		   
+		limit #{start}, #{pageSize}   
+	</select>
+	
+	<select id="Webtoon_getTotal" parameterType="WebtoonDto" resultType="Integer">
+		select count(*) from webtoon_tbl 
+		<if test='key!=null'>
+	
+					<if test='key=="0"'>
+					where genre_code = 00 
+					</if>
+					<if test='key=="1"'>
+					where genre_code = 01 
+					</if>
+					<if test='key=="2"'>
+					where genre_code = 02 
+					</if>
+					<if test='key=="3"'>
+					where genre_code = 03 
+					</if>
+					<if test='key=="4"'>
+					where genre_code = 04
+					</if>
+					<if test='key=="5"'>
+					where genre_code = 05
+					</if>
+					<if test='key=="6"'>
+					where genre_code = 06
+					</if>
+					<if test='key=="7"'>
+					</if>
+				
+				
+				</if> 
+		
+	</select>
+	 
+	 <select id="Webtoon_getView" parameterType="WebtoonDto" resultType="WebtoonDto">
+	 	select A.*,
+	 	ifnull((select round(avg(star_point),2) from review_tbl B where A.board_seq =B.board_seq and A.category_code=B.category_code),0) as star_avg
+	 	 from webtoon_tbl A where board_seq=#{board_seq}
+	 </select>
+	 
+	  <select id="Webtoon_getRank" parameterType="WebtoonDto" resultType="WebtoonDto">
+		 select A.*,
+			ifnull((select round(avg(star_point),2) from review_tbl B where A.board_seq =B.board_seq and A.category_code=B.category_code),0) as star_avg 
+				from webtoon_tbl A order by star_avg desc limit 0,10
+	</select>
+	
+	
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

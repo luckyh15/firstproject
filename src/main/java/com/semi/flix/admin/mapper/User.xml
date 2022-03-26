@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC 
+	"-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+<mapper namespace="User">
+	
+	<!-- 쿼리를 xml로 작성하고 id:식별값	parameterType:우리가 전달할 값
+		 resultType:데이터를 받아오는 값 -->
+	<select id="User_getList" parameterType="UserDto"	resultType="UserDto">
+ 		
+ 		select
+ 			user_seq
+ 			,user_id
+ 			,password
+ 			,nick_name
+ 			,name
+ 			,email
+ 			,phone
+ 			,address1
+ 			,address2
+ 			,zipcode
+ 			,user_images
+ 			,wdate
+ 			,rnum
+		from
+ 		(
+ 		select
+			A.user_seq
+ 			,A.user_id
+ 			,A.password
+ 			,A.nick_name
+ 			,A.name
+ 			,A.email
+ 			,A.phone
+ 			,A.address1
+ 			,A.address2
+ 			,A.zipcode
+ 			,A.user_images
+		    ,wdate
+		    ,@rownum := @rownum+1 AS rnum
+		from user A, (select @rownum:=0) B
+		
+		<!-- if test="key=='1'" 이렇게 쓰면 인식이 안된다. 따음표 위치 잘 확인하자.-->
+		
+		<if test='key!=null and keyword!=null'>
+
+         <if test='key=="1"'>
+         where user_id like concat('%', #{keyword} , '%') or
+               name like concat('%', #{keyword} , '%') or 
+               nick_name like concat('%', #{keyword} , '%') 
+         </if>
+         
+         <if test='key=="2"'>
+         where user_id like concat('%', #{keyword} , '%')
+         </if>
+         
+         <if test='key=="3"'>
+         where name like concat('%', #{keyword} , '%')
+         </if>
+         
+         <if test='key=="4"'>
+         where nick_name like concat('%', #{keyword} , '%')
+         </if>
+         
+      	</if>
+      	
+		order by user_seq desc
+		) A
+		limit #{start}, #{pageSize}
+	</select>
+	<!-- 
+		paging 쿼리는 dbms마다 다르다
+		select ~~ limit 시작위치, 개수
+	 -->
+	<!-- 페이징 때문에 전체 레코드 개수를 알아오기 위한 쿼리가 필요하다. -->
+	<select id="User_getTotal" parameterType="UserDto" resultType="Integer">
+		select count(*) from user
+		
+		<if test='key!=null and keyword!=null'>
+
+         <if test='key=="1"'>
+         where user_id like concat('%', #{keyword} , '%') or
+               name like concat('%', #{keyword} , '%') or 
+               nick_name like concat('%', #{keyword} , '%') 
+         </if>
+         
+         <if test='key=="2"'>
+         where user_id like concat('%', #{keyword} , '%')
+         </if>
+         
+         <if test='key=="3"'>
+         where name like concat('%', #{keyword} , '%')
+         </if>
+         
+         <if test='key=="4"'>
+         where nick_name like concat('%', #{keyword} , '%')
+         </if>
+         
+      	</if>
+	</select>
+	
+	<select id="User_getView" parameterType="String"	resultType="UserDto">
+ 		select
+			A.user_seq
+ 			,A.user_id
+ 			,A.password
+ 			,A.nick_name
+ 			,A.name
+ 			,A.email
+ 			,A.phone
+ 			,A.address1
+ 			,A.address2
+ 			,A.zipcode
+ 			,A.user_images
+		    ,A.wdate
+		from user A where user_seq=#{user_seq}
+
+	</select>
+	
+	<delete id="User_delete" parameterType="String">
+		delete from user where user_seq=#{user_seq}
+	</delete>
+	
+	<update id="User_update" parameterType="UserDto">
+		update user set user_id = #{user_id}
+						,password = #{password}
+						,nick_name = #{nick_name}
+						,name = #{name}
+						,email = #{email}
+						,phone = #{phone}
+						,address1 = #{address1}
+						,address2 = #{address2}
+						,zipcode = #{zipcode}
+						,user_images = #{user_images}
+		where user_seq=#{user_seq}
+	</update>
+	
+	<insert id="User_insert" parameterType="UserDto">
+		insert into user
+		(user_id, password, nick_name, name, email, phone, address1, address2, zipcode, user_images, wdate)
+		values
+		(#{user_id}, #{password}, #{nick_name}, #{name}, #{email}, #{phone}, #{address1}, #{address2}, #{zipcode}, #{user_images}, now())
+	</insert>
+	
+	<select id="User_isDuplicate" parameterType="UserDto" resultType="Integer">
+		select count(*) from user
+		where user_id = #{user_id}
+	</select>
+	
+	<select id="Mail_find" parameterType="UserDto" resultType="Integer">
+		select user_seq from user
+		where email = #{email}
+	</select>
+</mapper>

@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+	 PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+<mapper namespace="Movie">
+
+	<select id="Movie_getList" parameterType="MovieDto" resultType="MovieDto">
+		select A.*, 
+			ifnull((select round(avg(star_point),2) from review_tbl B where A.board_seq =B.board_seq and A.category_code=B.category_code),0) as star_avg 
+		 from 
+ 		(
+	 		select
+				board_seq,
+				category_code,
+				genre_code,
+				movie_title,
+				movie_producer,
+				movie_content,
+				movie_images,
+				movie_hit,
+				movie_productionyear,
+				movie_agelimit,
+				movie_url,
+			    @rownum := @rownum+1 AS rnum
+				from movie_tbl A, (select @rownum:=0) B
+				
+				<if test='key!=null'>
+	
+					<if test='key=="0"'>
+					where genre_code = 00 
+					</if>
+					<if test='key=="1"'>
+					where genre_code = 01 
+					</if>
+					<if test='key=="2"'>
+					where genre_code = 02 
+					</if>
+					<if test='key=="3"'>
+					where genre_code = 03 
+					</if>
+					<if test='key=="4"'>
+					where genre_code = 04
+					</if>
+					<if test='key=="5"'>
+					where genre_code = 05
+					</if>
+					<if test='key=="6"'>
+					where genre_code = 06
+					</if>
+					<if test='key=="7"'>
+					where genre_code = 07
+					</if>
+					<if test='key=="8"'>
+					where genre_code = 08
+					</if>
+					<if test='key=="9"'>
+					where genre_code = 09
+					</if>
+					<if test='key=="10"'>
+					where genre_code = 10
+					</if>
+					<if test='key=="11"'>
+					where genre_code = 11
+					</if>
+					<if test='key=="12"'>
+					</if>
+				
+				
+				</if> 
+		
+				
+			
+		 order by board_seq desc
+		) A
+		   
+		limit #{start}, #{pageSize}     
+	</select>
+	
+	
+	
+	<select id="Movie_getTotal" parameterType="MovieDto" resultType="Integer">
+					select count(*) from movie_tbl 
+				<if test='key!=null'>
+	
+					<if test='key=="0"'>
+					where genre_code = 00 
+					</if>
+					<if test='key=="1"'>
+					where genre_code = 01 
+					</if>
+					<if test='key=="2"'>
+					where genre_code = 02 
+					</if>
+					<if test='key=="3"'>
+					where genre_code = 03 
+					</if>
+					<if test='key=="4"'>
+					where genre_code = 04
+					</if>
+					<if test='key=="5"'>
+					where genre_code = 05
+					</if>
+					<if test='key=="6"'>
+					where genre_code = 06
+					</if>
+					<if test='key=="7"'>
+					where genre_code = 07
+					</if>
+					<if test='key=="8"'>
+					where genre_code = 08
+					</if>
+					<if test='key=="9"'>
+					where genre_code = 09
+					</if>
+					<if test='key=="10"'>
+					</if>
+				</if> 
+	</select>
+	
+	<select id="Movie_getView" parameterType="MovieDto" resultType="MovieDto">
+	 	select A.*,
+	 	ifnull((select round(avg(star_point),2) from review_tbl B where A.board_seq =B.board_seq and A.category_code=B.category_code),0) as star_avg
+	 	 
+	 	from movie_tbl A where board_seq=#{board_seq}
+	 </select>
+	 
+	
+	
+		<select id="Movie_getRank" parameterType="MovieDto" resultType="MovieDto">
+		select A.*,
+			ifnull((select round(avg(star_point),2) from review_tbl B where A.board_seq =B.board_seq and A.category_code=B.category_code),0) as star_avg 
+				from movie_tbl A order by star_avg desc limit 0,10
+	</select>
+	
+
+	
+</mapper>
+
+
+
+
+
+
+
+
